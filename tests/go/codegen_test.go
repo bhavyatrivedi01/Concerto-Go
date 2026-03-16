@@ -19,7 +19,7 @@ import (
 
 	// Import the generated package.
 	// Adjust this import path if your namespace / version differs.
-	generated "github.com/accordproject/concerto-codegen-test/go/generated/go"
+	generated "github.com/Concerto-Go/generated/go"
 )
 
 // ---------------------------------------------------------------------------

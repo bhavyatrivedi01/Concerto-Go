@@ -1,3 +1,3 @@
-module github.com/accordproject/concerto-codegen-test/go
+module concerto_codegen_test
  
 go 1.25

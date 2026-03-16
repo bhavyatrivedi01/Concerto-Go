@@ -6,6 +6,8 @@ FROM node:20-alpine AS codegen
 WORKDIR /workspace
 
 # Install @accordproject/concerto-cli globally
+# --ignore-scripts skips the postinstall lint checks that require
+# lockfile-lint (not available in the alpine environment)
 RUN npm install -g @accordproject/concerto-cli --ignore-scripts
 
 # Copy the Concerto model(s) into the image
@@ -22,24 +24,20 @@ RUN mkdir -p generated/go && \
 # ============================================================
 # Stage 2: Go runtime (compile + test generated code)
 # ============================================================
-FROM golang:1.25-alpine AS test
+FROM golang:1.22-alpine AS test
 
-WORKDIR /app
+# Set working directory to where go.mod lives
+WORKDIR /app/tests/go
 
-# Copy the generated Go source from the codegen stage
-COPY --from=codegen /workspace/generated/go ./generated/go
+# Copy the hand-written Go test harness (includes go.mod)
+COPY tests/go/ .
 
-# Copy the hand-written Go test harness
-COPY tests/go/ ./tests/go/
-
-# Copy go.mod / go.sum for the test module
-COPY tests/go/go.mod ./go.mod
-
-# Download dependencies (if any)
-RUN go mod download || true
+# Copy the generated Go source from the codegen stage into
+# the path the test module expects it
+COPY --from=codegen /workspace/generated/go ./generated/go/
 
 # Build: ensure the generated code compiles without errors
 RUN go build ./...
 
-# Run tests
-CMD ["go", "test", "-v", "./tests/go/..."]
+# Run tests (working directory is already /app/tests/go)
+CMD ["go", "test", "-v", "./..."]

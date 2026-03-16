@@ -1,0 +1,31 @@
+namespace test@1.0.0
+
+import concerto.metamodel@1.0.0.{ConceptDeclaration}
+
+concept Address {
+  o String street
+  o String city
+  o String country
+}
+
+concept Person identified by email {
+  o String email
+  o String firstName
+  o String lastName
+  o DateTime dob
+  o Address address
+}
+
+enum EmploymentStatus {
+  o FULL_TIME
+  o PART_TIME
+  o CONTRACT
+  o UNEMPLOYED
+}
+
+concept Employee extends Person {
+  o String employeeId
+  o EmploymentStatus status
+  o Double salary
+}
+

@@ -1,0 +1,33 @@
+name: Codegen Tests – Go
+
+on:
+  push:
+    branches: ["main", "dev"]
+    paths:
+      - "models/**"
+      - "tests/go/**"
+      - "Dockerfile.go-codegen-test"
+      - ".github/workflows/codegen-test-go.yml"
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  codegen-test-go:
+    name: Build & Test Go Codegen Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -f Dockerfile.go-codegen-test \
+            -t concerto-codegen-test-go \
+            .
+
+      - name: Run tests inside Docker image
+        run: |
+          docker run --rm concerto-codegen-test-go

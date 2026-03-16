@@ -1,0 +1,46 @@
+# ============================================================
+# Stage 1: Node.js + Concerto CLI (code generation)
+# ============================================================
+FROM node:20-alpine AS codegen
+
+WORKDIR /workspace
+
+# Install @accordproject/concerto-cli globally
+RUN npm install -g @accordproject/concerto-cli
+
+# Copy the Concerto model(s) into the image
+COPY models/ ./models/
+
+# Run code generation for Go target
+# Output is placed in /workspace/generated/go/
+RUN mkdir -p generated/go && \
+    concerto compile \
+      --model models/test.cto \
+      --target golang \
+      --output generated/go
+
+# ============================================================
+# Stage 2: Go runtime (compile + test generated code)
+# ============================================================
+FROM golang:1.22-alpine AS test
+
+WORKDIR /app
+
+# Copy the generated Go source from the codegen stage
+COPY --from=codegen /workspace/generated/go ./generated/go
+
+# Copy the hand-written Go test harness
+COPY tests/go/ ./tests/go/
+
+# Copy go.mod / go.sum for the test module
+COPY tests/go/go.mod ./go.mod
+COPY tests/go/go.sum ./go.sum 2>/dev/null || true
+
+# Download dependencies (if any)
+RUN go mod download || true
+
+# Build: ensure the generated code compiles without errors
+RUN go build ./...
+
+# Run tests
+CMD ["go", "test", "-v", "./tests/go/..."]

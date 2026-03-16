@@ -5,8 +5,6 @@ FROM node:20-alpine AS codegen
 
 WORKDIR /workspace
 
-# --ignore-scripts skips the postinstall lint checks that require
-# lockfile-lint (not available in the alpine environment)
 RUN npm install -g @accordproject/concerto-cli --ignore-scripts
 
 COPY models/ ./models/
@@ -20,12 +18,16 @@ RUN mkdir -p generated/go && \
 # ============================================================
 # Stage 2: Go runtime (compile + test generated code)
 # ============================================================
-FROM golang:1.25-alpine AS test
+FROM golang:1.22-alpine AS test
 
 WORKDIR /app
 
 # Copy the generated Go source from the codegen stage
 COPY --from=codegen /workspace/generated/go ./
+
+# Print the generated files so we can see the actual package name
+RUN echo "=== Generated files ===" && ls -la && \
+    echo "=== Package declarations ===" && grep -n "^package" *.go
 
 # Copy the test file into the same directory as the generated code
 COPY tests/go/codegen_test.go ./

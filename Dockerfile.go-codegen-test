@@ -6,7 +6,7 @@ FROM node:20-alpine AS codegen
 WORKDIR /workspace
 
 # Install @accordproject/concerto-cli globally
-RUN npm install -g @accordproject/concerto-cli
+RUN npm install -g @accordproject/concerto-cli --ignore-scripts
 
 # Copy the Concerto model(s) into the image
 COPY models/ ./models/

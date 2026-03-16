@@ -25,10 +25,6 @@ WORKDIR /app
 # Copy the generated Go source from the codegen stage
 COPY --from=codegen /workspace/generated/go ./
 
-# Print the generated files so we can see the actual package name
-RUN echo "=== Generated files ===" && ls -la && \
-    echo "=== Package declarations ===" && grep -n "^package" *.go
-
 # Copy the test file into the same directory as the generated code
 COPY tests/go/codegen_test.go ./
 

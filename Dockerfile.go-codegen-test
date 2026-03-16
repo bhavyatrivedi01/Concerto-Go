@@ -22,7 +22,7 @@ RUN mkdir -p generated/go && \
 # ============================================================
 # Stage 2: Go runtime (compile + test generated code)
 # ============================================================
-FROM golang:1.22-alpine AS test
+FROM golang:1.25-alpine AS test
 
 WORKDIR /app
 
@@ -34,7 +34,6 @@ COPY tests/go/ ./tests/go/
 
 # Copy go.mod / go.sum for the test module
 COPY tests/go/go.mod ./go.mod
-COPY tests/go/go.sum ./go.sum 2>/dev/null || true
 
 # Download dependencies (if any)
 RUN go mod download || true

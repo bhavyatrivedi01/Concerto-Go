@@ -18,18 +18,23 @@ RUN mkdir -p generated/go && \
 # ============================================================
 # Stage 2: Go runtime (compile + test generated code)
 # ============================================================
-FROM golang:1.25-alpine AS test
+FROM golang:1.22-alpine AS test
 
 WORKDIR /app
 
-# Copy the generated Go source from the codegen stage
+# Copy generated code
 COPY --from=codegen /workspace/generated/go ./
 
-# Copy the test file into the same directory as the generated code
+# Copy test file
 COPY tests/go/codegen_test.go ./
 
-# Create a minimal go.mod for this single package
-RUN go mod init concerto_codegen_test && go mod tidy
+# Extract the real package name from the generated code and patch
+# the test file to use the same package, then build and test
+RUN PKG=$(grep -m1 "^package" *.go | grep -v codegen_test | awk '{print $2}') && \
+    echo "Detected package: $PKG" && \
+    sed -i "s/^package .*/package $PKG/" codegen_test.go && \
+    go mod init concerto_codegen_test && \
+    go mod tidy && \
+    go test -v ./...
 
-# Run tests
 CMD ["go", "test", "-v", "./..."]

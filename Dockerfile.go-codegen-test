@@ -7,8 +7,8 @@ RUN concerto compile \
     --model models/test.cto \
     --target golang \
     --output generated/go
-
+ 
 FROM golang:1.22-alpine AS test
-WORKDIR /app
+WORKDIR /workspace/generated/go
 COPY --from=codegen /workspace/generated/go ./
 RUN go mod init concerto_codegen_test && go build ./...

@@ -1,10 +1,12 @@
 # Concerto-Go
 
-**Concerto-Go: Automated Model-to-Go Pipeline**
+**Concerto-Go: Automated Model-to-Go Pipeline****
+
 This repository hosts a specialized CI/CD environment designed to automate the lifecycle of Accord Project Concerto models. It focuses on the seamless transformation of Concerto Modeling Language (.cto) files into production-ready Go source code.
 
  
 ** **********Project Evolution *************
+
 1. Proof of Concept (Local Development)
 The project began as an exploration of the Concerto ecosystem. By following the Concerto Go CodeGen specifications, I successfully established a local environment to manually generate Go components. This stage was critical for understanding the underlying mapping between Concerto namespaces and Go package structures.
 
@@ -21,6 +23,7 @@ Compiles the provided model.cto into Go source code.
 Verifies the syntactical integrity and compilability of the generated assets.
 
 *************** Architecture & Tech Stack*************
+
 Logic: Concerto Modeling Language (.cto)
 
 Engine: @accordproject/concerto-cli
@@ -30,6 +33,7 @@ Environment: Docker (Alpine Linux / Go 1.25 / Node.js)
 Automation: GitHub Actions
 
 ******Future Roadmap (GSoC Objectives)******
+
 Moving forward, I aim to expand this pipeline into a comprehensive verification framework:
 
 Dynamic Test Injection: Implementing automated stages to generate and execute Go test cases, specifically focusing on JSON serialization/deserialization integrity for generated structs.

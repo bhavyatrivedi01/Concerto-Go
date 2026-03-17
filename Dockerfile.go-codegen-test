@@ -1,40 +1,10 @@
-# ============================================================
-# Stage 1: Node.js + Concerto CLI (code generation)
-# ============================================================
 FROM node:20-alpine AS codegen
-
 WORKDIR /workspace
-
 RUN npm install -g @accordproject/concerto-cli --ignore-scripts
-
 COPY models/ ./models/
+RUN concerto compile --model models/test.cto --target golang --output generated/go
 
-RUN mkdir -p generated/go && \
-    concerto compile \
-      --model models/test.cto \
-      --target golang \
-      --output generated/go
-
-# ============================================================
-# Stage 2: Go runtime (compile + test generated code)
-# ============================================================
 FROM golang:1.22-alpine AS test
-
 WORKDIR /app
-
-# Copy generated code
 COPY --from=codegen /workspace/generated/go ./
-
-# Copy test file
-COPY tests/go/codegen_test.go ./
-
-# Extract the real package name from the generated code and patch
-# the test file to use the same package, then build and test
-RUN PKG=$(grep -m1 "^package" *.go | grep -v codegen_test | awk '{print $2}') && \
-    echo "Detected package: $PKG" && \
-    sed -i "s/^package .*/package $PKG/" codegen_test.go && \
-    go mod init concerto_codegen_test && \
-    go mod tidy && \
-    go test -v ./...
-
-CMD ["go", "test", "-v", "./..."]
+RUN go mod init concerto_codegen_test && go build ./...

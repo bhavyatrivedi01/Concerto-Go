@@ -2,7 +2,11 @@ FROM node:20-alpine AS codegen
 WORKDIR /workspace
 RUN npm install -g @accordproject/concerto-cli --ignore-scripts
 COPY models/ ./models/
-RUN concerto compile --model models/test.cto --target golang --output generated/go
+RUN concerto compile \
+    --model https://models.accordproject.org/concerto/1.0.0.cto \
+    --model models/test.cto \
+    --target golang \
+    --output generated/go
 
 FROM golang:1.22-alpine AS test
 WORKDIR /app

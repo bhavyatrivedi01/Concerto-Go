@@ -5,23 +5,28 @@ COPY models/ ./models/
 RUN concerto compile \
     --model models/test.cto \
     --target golang \
-    --output /output && \
-    echo "=== Generated files ===" && \
-    ls -la /output
- 
+    --output /output
+
 FROM golang:1.22-alpine AS test
 WORKDIR /app
 RUN go mod init concerto_codegen_test
- 
-# Copy generated files into /app/staging, then move each .go file
-# into a subdirectory named after its package
+
 COPY --from=codegen /output /app/staging
+
+# 1. Move each generated .go file into a subdirectory matching its package name
 RUN for f in /app/staging/*.go; do \
       pkg=$(grep -m1 "^package" "$f" | awk '{print $2}'); \
       mkdir -p "/app/$pkg"; \
       cp "$f" "/app/$pkg/"; \
-    done && \
-    rm -rf /app/staging
- 
-RUN go mod tidy && go build ./...
- 
+    done && rm -rf /app/staging
+
+# 2. Fix bare imports so they are module-qualified
+#    e.g. import "concerto_1_0_0" → import "concerto_codegen_test/concerto_1_0_0"
+#    We collect all package names first, then replace only those imports
+RUN PKGS=$(find /app -name "*.go" | xargs grep -h "^package" | awk '{print $2}' | sort -u) && \
+    for pkg in $PKGS; do \
+      find /app -name "*.go" -exec \
+        sed -i "s|\"$pkg\"|\"concerto_codegen_test/$pkg\"|g" {} +; \
+    done
+
+RUN go build ./...

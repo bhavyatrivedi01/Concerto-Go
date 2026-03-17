@@ -3,14 +3,14 @@ WORKDIR /workspace
 RUN npm install -g @accordproject/concerto-cli --ignore-scripts
 COPY models/ ./models/
 RUN concerto compile \
-    --model https://models.accordproject.org/concerto/1.0.0.cto \
     --model models/test.cto \
     --target golang \
     --output /output && \
     echo "=== Generated files ===" && \
     ls -la /output
-
+ 
 FROM golang:1.22-alpine AS test
 COPY --from=codegen /output /app
 WORKDIR /app
 RUN go mod init concerto_codegen_test && go build ./...
+ 

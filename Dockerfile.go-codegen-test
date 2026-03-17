@@ -6,9 +6,11 @@ RUN concerto compile \
     --model https://models.accordproject.org/concerto/1.0.0.cto \
     --model models/test.cto \
     --target golang \
-    --output generated/go
- 
+    --output /output && \
+    echo "=== Generated files ===" && \
+    ls -la /output
+
 FROM golang:1.22-alpine AS test
-WORKDIR /workspace/generated/go
-COPY --from=codegen /workspace/generated/go ./
+COPY --from=codegen /output /app
+WORKDIR /app
 RUN go mod init concerto_codegen_test && go build ./...

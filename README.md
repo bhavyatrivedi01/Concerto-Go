@@ -13,7 +13,7 @@ To eliminate "it works on my machine" inconsistencies, I engineered a custom Doc
 ### CI/CD Integration (GitHub Actions)
 The current architecture features an automated GitHub Actions Pipeline. Upon every commit, the system:
 * Initializes the specialized Docker build environment.
-* Compiles the provided `model.cto` into Go source code.
+* Compiles the provided `test.cto` into Go source code.
 * Verifies the syntactical integrity and compilability of the generated assets.
 
 ## Architecture and Tech Stack

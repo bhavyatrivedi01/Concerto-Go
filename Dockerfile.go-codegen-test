@@ -10,7 +10,18 @@ RUN concerto compile \
     ls -la /output
  
 FROM golang:1.22-alpine AS test
-COPY --from=codegen /output /app
 WORKDIR /app
-RUN go mod init concerto_codegen_test && go build ./...
+RUN go mod init concerto_codegen_test
+ 
+# Copy generated files into /app/staging, then move each .go file
+# into a subdirectory named after its package
+COPY --from=codegen /output /app/staging
+RUN for f in /app/staging/*.go; do \
+      pkg=$(grep -m1 "^package" "$f" | awk '{print $2}'); \
+      mkdir -p "/app/$pkg"; \
+      cp "$f" "/app/$pkg/"; \
+    done && \
+    rm -rf /app/staging
+ 
+RUN go mod tidy && go build ./...
  

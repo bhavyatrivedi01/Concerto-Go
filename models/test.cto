@@ -1,7 +1,5 @@
 namespace test@1.0.0
 
-import concerto.metamodel@1.0.0.{ConceptDeclaration}
-
 concept Address {
   o String street
   o String city
@@ -28,4 +26,3 @@ concept Employee extends Person {
   o EmploymentStatus status
   o Double salary
 }
-
